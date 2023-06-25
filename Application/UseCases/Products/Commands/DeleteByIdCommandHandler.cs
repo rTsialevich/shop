@@ -1,4 +1,5 @@
-﻿using Domain.Repositories;
+﻿using Domain.Contexts;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.UseCases.Products.Commands
@@ -12,22 +13,18 @@ namespace Application.UseCases.Products.Commands
 
         public int Id { get; init; }
     }
-    public sealed class DeleteByIdCommandHandler : IRequestHandler<DeleteByIdCommand>
+
+    public sealed class DeleteByIdCommandHandler : CommandHandler<DeleteByIdCommand>
     {
-        private readonly IProductRepository _productRepository;
+        public DeleteByIdCommandHandler(IWriteDbContext context) : base(context) { }
 
-        public DeleteByIdCommandHandler(IProductRepository productRepository)
+        public override async Task Handle(DeleteByIdCommand request, CancellationToken cancellationToken)
         {
-            _productRepository = productRepository;
-        }
-
-        public async Task Handle(DeleteByIdCommand request, CancellationToken cancellationToken)
-        {
-            var entity = await _productRepository.FetchByIdAsync(request.Id);
+            var entity = await _context.FetchItemByPredictionAsync<Product>(p => p.Id == request.Id);
             if (entity != null)
             {
-                _productRepository.Delete(entity);
-                await _productRepository.SaveChangesAsync();
+                _context.Delete(entity);
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }

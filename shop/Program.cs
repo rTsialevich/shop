@@ -1,18 +1,22 @@
 using Application;
-using Domain.Repositories;
+using Domain.Contexts;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 // Add services to the container.
-builder.Services.AddDbContext<RepositoryDbContext>(builder =>
+builder.Services.AddDbContext<WriteDbContext>(builder =>
 {
-    builder.UseSqlServer(configuration.GetConnectionString("Database"));
+    builder.UseSqlServer(configuration.GetConnectionString("WriteDatabase"));
 });
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IPurchaserRepository, PurchaserRepository>();
+builder.Services.AddDbContext<ReadDbContext>(builder =>
+{
+    builder.UseSqlServer(configuration.GetConnectionString("ReadDatabase"));
+});
+
+builder.Services.AddScoped<IWriteDbContext, WriteDbContext>();
+builder.Services.AddScoped<IReadDbContext, ReadDbContext>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ApplicationClass).Assembly));
 builder.Services.AddControllers();
@@ -25,8 +29,11 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<RepositoryDbContext>();
-    dbContext.Database.Migrate();
+    var writeDbContext = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
+    writeDbContext.Database.Migrate();
+
+    var readDbContext = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
+    readDbContext.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

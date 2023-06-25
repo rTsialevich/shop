@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Domain.Repositories;
+﻿using Domain.Contexts;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.UseCases.Products.Commands
@@ -10,16 +10,11 @@ namespace Application.UseCases.Products.Commands
         public decimal Price { get; init; }
     }
 
-    public sealed class CreateEntityCommandHandler : IRequestHandler<CreateProductCommand, int>
+    public sealed class CreateEntityCommandHandler : CommandWithResultHandler<CreateProductCommand, int>
     {
-        private readonly IProductRepository _productRepository;
+        public CreateEntityCommandHandler(IWriteDbContext context) : base(context) { }
 
-        public CreateEntityCommandHandler(IProductRepository productRepository)
-        {
-            _productRepository = productRepository;
-        }
-
-        public async Task<int> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+        public override async Task<int> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
             //TODO: mapping
             var entity = new Product
@@ -28,8 +23,8 @@ namespace Application.UseCases.Products.Commands
                 Price = request.Price,
             };
 
-            _productRepository.Create(entity);
-            await _productRepository.SaveChangesAsync();
+            await _context.CreateAsync(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
             return entity.Id;
         }

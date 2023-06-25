@@ -1,4 +1,4 @@
-﻿using Domain.Repositories;
+﻿using Domain.Contexts;
 using MediatR;
 
 namespace Application.UseCases.Purchasers.Commands
@@ -7,19 +7,14 @@ namespace Application.UseCases.Purchasers.Commands
     {
     }
 
-    public sealed class CreateEntityCommandHandler : IRequestHandler<CreatePurchaserCommand, int>
+    public sealed class CreateEntityCommandHandler : CommandWithResultHandler<CreatePurchaserCommand, int>
     {
-        private readonly IPurchaserRepository _purchaserRepository;
+        public CreateEntityCommandHandler(IWriteDbContext context) : base(context) { }
 
-        public CreateEntityCommandHandler(IPurchaserRepository purchaserRepository)
-        {
-            _purchaserRepository = purchaserRepository;
-        }
-
-        public async Task<int> Handle(CreatePurchaserCommand request, CancellationToken cancellationToken)
+        public override async Task<int> Handle(CreatePurchaserCommand request, CancellationToken cancellationToken)
         {
             return await Task.FromResult(0);
-            //TODO:
+            //TODO
             //var entity = new Order
             //{
 

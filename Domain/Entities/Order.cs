@@ -7,7 +7,7 @@
         Completed = 3,
     }
 
-    public class Order
+    public class Order : DbEntity
     {
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }

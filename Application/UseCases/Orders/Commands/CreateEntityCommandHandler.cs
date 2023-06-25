@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Domain.Repositories;
+﻿using Domain.Contexts;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.UseCases.Orders.Commands
@@ -8,16 +8,11 @@ namespace Application.UseCases.Orders.Commands
     {
     }
 
-    public sealed class CreateEntityCommandHandler : IRequestHandler<CreateOrderCommand, int>
+    public sealed class CreateEntityCommandHandler : CommandWithResultHandler<CreateOrderCommand, int>
     {
-        private readonly IOrderRepository _orderRepository;
+        public CreateEntityCommandHandler(IWriteDbContext context) : base(context) { }
 
-        public CreateEntityCommandHandler(IOrderRepository orderRepository)
-        {
-            _orderRepository = orderRepository;
-        }
-
-        public async Task<int> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+        public override async Task<int> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
             return await Task.FromResult(0);
             //TODO

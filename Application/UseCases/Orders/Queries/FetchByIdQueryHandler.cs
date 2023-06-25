@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Domain.Repositories;
+﻿using Domain.Contexts;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.UseCases.Orders.Queries
@@ -14,16 +14,11 @@ namespace Application.UseCases.Orders.Queries
         public int Id { get; init; }
     }
 
-    public sealed class FetchByIdQueryHandler : IRequestHandler<FetchByIdQuery, Order?>
+    public sealed class FetchByIdQueryHandler : QueryHandler<FetchByIdQuery, Order?>
     {
-        private readonly IOrderRepository _orderRepository;
+        public FetchByIdQueryHandler(IReadDbContext context) : base(context) { }
 
-        public FetchByIdQueryHandler(IOrderRepository orderRepository)
-        {
-            _orderRepository = orderRepository;
-        }
-
-        public Task<Order?> Handle(FetchByIdQuery request, CancellationToken cancellationToken)
-            => _orderRepository.FetchByIdAsync(request.Id);
+        public override Task<Order?> Handle(FetchByIdQuery request, CancellationToken cancellationToken)
+            => _context.FetchItemByPredictionAsync<Order>(p => p.Id == request.Id);
     }
 }
