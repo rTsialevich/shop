@@ -2,6 +2,7 @@ using Application;
 using Domain.Contexts;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using shop;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -32,8 +33,12 @@ using (var scope = app.Services.CreateScope())
     var writeDbContext = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
     writeDbContext.Database.Migrate();
 
+    DbInitializer.Initialize(writeDbContext);
+
     var readDbContext = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
     readDbContext.Database.Migrate();
+
+    DbInitializer.Initialize(readDbContext);
 }
 
 // Configure the HTTP request pipeline.
