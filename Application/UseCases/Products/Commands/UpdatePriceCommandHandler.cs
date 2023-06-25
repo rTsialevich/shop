@@ -1,4 +1,5 @@
-﻿using Domain.Repositories;
+﻿using Domain.Contexts;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.UseCases.Products.Commands
@@ -9,24 +10,19 @@ namespace Application.UseCases.Products.Commands
         public decimal Price { get; set; }
     }
 
-    public sealed class UpdatePriceCommandHandler : IRequestHandler<UpdatePriceCommand>
+    public sealed class UpdatePriceCommandHandler : CommandHandler<UpdatePriceCommand>
     {
-        private readonly IProductRepository _productRepository;
+        public UpdatePriceCommandHandler(IWriteDbContext context) : base(context) { }
 
-        public UpdatePriceCommandHandler(IProductRepository productRepository)
+        public override async Task Handle(UpdatePriceCommand request, CancellationToken cancellationToken)
         {
-            _productRepository = productRepository;
-        }
-
-        public async Task Handle(UpdatePriceCommand request, CancellationToken cancellationToken)
-        {
-            var entity = await _productRepository.FetchByIdAsync(request.Id);
-
+            var entity = await _context.FetchItemByPredictionAsync<Product>(p => p.Id == request.Id);
             if (entity != null)
             {
                 entity.Price = request.Price;
-                _productRepository.Update(entity);
-                await _productRepository.SaveChangesAsync();
+
+                _context.Update(entity);
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }

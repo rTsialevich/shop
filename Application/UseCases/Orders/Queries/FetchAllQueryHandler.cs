@@ -1,20 +1,16 @@
-﻿using Domain.Entities;
-using Domain.Repositories;
+﻿using Domain.Contexts;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.UseCases.Orders.Queries
 {
-    public sealed class FetchAllQuery : IRequest<IEnumerable<Order>> { }
-    public sealed class FetchAllQueryHandler : IRequestHandler<FetchAllQuery, IEnumerable<Order>>
+    public sealed class FetchAllQuery : IRequest<List<Order>> { }
+
+    public sealed class FetchAllQueryHandler : QueryHandler<FetchAllQuery, List<Order>>
     {
-        private readonly IOrderRepository _orderRepository;
+        public FetchAllQueryHandler(IReadDbContext context) : base(context) { }
 
-        public FetchAllQueryHandler(IOrderRepository orderRepository)
-        {
-            _orderRepository = orderRepository;
-        }
-
-        public Task<IEnumerable<Order>> Handle(FetchAllQuery request, CancellationToken cancellationToken)
-            => _orderRepository.FetchAllAsync();
+        public override Task<List<Order>> Handle(FetchAllQuery request, CancellationToken cancellationToken)
+            => _context.FetchAllAsync<Order>();
     }
 }

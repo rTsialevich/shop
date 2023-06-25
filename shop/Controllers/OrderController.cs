@@ -16,7 +16,7 @@ namespace shop.Controllers
         public OrderController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]
-        public Task<IEnumerable<Order>> Get()
+        public Task<List<Order>> Get()
             => _mediator.Send(new FetchAllQuery());
 
         [HttpGet("{id}")]
